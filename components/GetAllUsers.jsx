@@ -8,8 +8,10 @@ const GetAllUsers = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUserDeleted, setIsUserDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
-
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
+    const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
+    setIsAdmin(role === 'ADMIN');
     fetchUsers();
   }, []);
 
@@ -66,6 +68,7 @@ const GetAllUsers = () => {
               {`${index + 1}. Username: ${user.username}, Nume: ${user.nume}, Prenume: ${user.prenume}, Telefon: ${user.telefon}, Role: ${user.roles}`}
             </h4>
           </pre>
+          {isAdmin && (
           <div className="btn-group">
             <Link to={`/user/update/${user.id}`}>
               <button className="btn btn-sm btn-outline-warning">
@@ -79,6 +82,7 @@ const GetAllUsers = () => {
               <FaTrash /> Delete User
             </button>
           </div>
+          )}
         </div>
       ))}
     </section>

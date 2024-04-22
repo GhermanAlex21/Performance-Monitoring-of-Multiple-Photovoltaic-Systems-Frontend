@@ -8,8 +8,11 @@ const GetAllSeries = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSerieDeleted, setIsSerieDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
+    setIsAdmin(role === 'ADMIN');
     fetchSeries();
   }, []);
 
@@ -62,16 +65,18 @@ const GetAllSeries = () => {
           <pre>
             <h4 style={{ color: "GrayText" }}>{`${index + 1}. ${serie.nume}`}</h4>
           </pre>
-          <div className="btn-group mb-4">
-            <Link to={`/update-serie/${serie.id}`}>
-              <button className="btn btn-sm btn-outline-warning mr-2"><FaEdit /> Edit Serie</button>
-            </Link>
-            <button
-              className="btn btn-sm btn-outline-danger"
-              onClick={() => handleDeleteSerie(serie.id)}>
-              Delete Serie
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="btn-group mb-4">
+              <Link to={`/update-serie/${serie.id}`}>
+                <button className="btn btn-sm btn-outline-warning mr-2"><FaEdit /> Edit Serie</button>
+              </Link>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleDeleteSerie(serie.id)}>
+                Delete Serie
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </section>

@@ -21,9 +21,12 @@ import UpdateUser from '../components/UpdateUser';
 import ProfileView from '../components/ProfieView';
 import ProfileUpdate from '../components/ProfileUpdate';
 
+
+
 const App = () => {
     return (
         <Router>
+             <Navbar /> {/* Acesta este noul tău NavBar */}
             <div className="container mt-4">
                 <Routes>
                     <Route path="/login" element={<Login />} />

@@ -8,8 +8,10 @@ const GetAllMarcas = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isMarcaDeleted, setIsMarcaDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
-
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
+    const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
+    setIsAdmin(role === 'ADMIN');
     fetchMarcas();
   }, []);
 
@@ -62,6 +64,7 @@ const GetAllMarcas = () => {
           <pre>
             <h4 style={{ color: "GrayText" }}>{`${index + 1}. ${marca.nume}`}</h4>
           </pre>
+          {isAdmin && (
           <div className="btn-group mb-4">
             <Link to={`/update-marca/${marca.id}`}>
               <button className="btn btn-sm btn-outline-warning mr-2">Edit Marca</button>
@@ -72,6 +75,7 @@ const GetAllMarcas = () => {
               Delete Marca
             </button>
           </div>
+          )}
         </div>
       ))}
     </section>

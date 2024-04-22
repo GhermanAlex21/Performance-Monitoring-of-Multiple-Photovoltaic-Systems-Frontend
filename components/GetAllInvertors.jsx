@@ -8,8 +8,10 @@ const GetAllInvertors = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isInvertorDeleted, setIsInvertorDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
-
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
+    const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
+    setIsAdmin(role === 'ADMIN');
     fetchInvertors();
   }, []);
 
@@ -62,6 +64,7 @@ const GetAllInvertors = () => {
           <pre>
             <h4 style={{ color: "GrayText" }}>{`${index + 1}. Marca: ${invertor.marca.nume}, Serie: ${invertor.serie.nume}`}</h4>
           </pre>
+          {isAdmin && (
           <div className="btn-group mb-4">
             <Link to={`/invertor/update/${invertor.id}`}>
               <button className="btn btn-sm btn-outline-warning mr-2">
@@ -75,6 +78,7 @@ const GetAllInvertors = () => {
               <FaTrash /> Delete Invertor
             </button>
           </div>
+          )}
         </div>
       ))}
     </section>
