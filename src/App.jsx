@@ -20,6 +20,10 @@ import 'tailwindcss/tailwind.css'
 import UpdateUser from '../components/UpdateUser';
 import ProfileView from '../components/ProfieView';
 import ProfileUpdate from '../components/ProfileUpdate';
+import SolarDataChart from '../components/SolarDataChart';
+import InvertorDataChart from '../components/InvertorDataChart';
+
+
 
 
 
@@ -46,6 +50,8 @@ const App = () => {
                         <Route path ="/user/update/:id" element={<UpdateUser/>}/>
                         <Route path ="/my-profile" element={<ProfileView/>}/>
                         <Route path ="/update-profile" element={<ProfileUpdate/>}/>
+                        <Route path ="/chart" element={<SolarDataChart/>}/>
+                        <Route path ="/statistics/:pesId" element={<InvertorDataChart/>}/>
                     </Route>
                 </Routes>
             </div>

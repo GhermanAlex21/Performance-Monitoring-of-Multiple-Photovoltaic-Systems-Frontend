@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getAllInvertors } from '../utils/service';
+import { useNavigate } from 'react-router-dom';  // Asigură-te că ai importat useNavigate
 
 function HomePage() {
   const [invertors, setInvertors] = useState([]);
-  const [selectedInvertor, setSelectedInvertor] = useState(null);
   const mapRef = useRef(null);
-  const infoWindowRef = useRef(new window.google.maps.InfoWindow());
+  const navigate = useNavigate();  // Inițializează useNavigate pentru a folosi în funcția de navigare
 
   useEffect(() => {
     const fetchData = async () => {
       const invertorData = await getAllInvertors();
       setInvertors(invertorData);
-      initMap(invertorData); // Inițializează harta
+      initMap(invertorData);
     };
 
     fetchData();
@@ -22,50 +22,40 @@ function HomePage() {
       zoom: 13,
       center: { lat: 47.6573, lng: 23.5681 },
     });
-  
-    mapRef.current = map; // Stochează referința hărții
-  
-    invertorData.forEach((invertor) => {
+
+    mapRef.current = map;
+
+    invertorData.forEach(invertor => {
       const marker = new window.google.maps.Marker({
         position: { lat: invertor.latitude, lng: invertor.longitude },
         map: map,
         title: `${invertor.marca.nume} ${invertor.serie.nume}`,
       });
-  
+
       marker.addListener('click', () => {
-        setSelectedInvertor(invertor);
+        const contentString = `
+          <div>
+            <h2>${invertor.marca.nume} ${invertor.serie.nume}</h2>
+            <p>Latitudine: ${invertor.latitude}</p>
+            <p>Longitudine: ${invertor.longitude}</p>
+            <p>Azimut: ${invertor.azimut}</p>
+            <button onclick="window.viewStatistics(${invertor.pesId})">Vizualizează Statisticile</button>
+          </div>
+        `;
+
+        const infoWindow = new window.google.maps.InfoWindow({
+          content: contentString
+        });
+
+        infoWindow.open(map, marker);
       });
-    });
-  
-    // Ascultă pentru clicuri pe hartă pentru a închide InfoWindow
-    map.addListener('click', () => {
-      if (infoWindowRef.current) {
-        infoWindowRef.current.close();
-        setSelectedInvertor(null); // Resetează invertorul selectat
-      }
     });
   };
 
-  useEffect(() => {
-    if (selectedInvertor && mapRef.current) {
-      const contentString = `
-        <div>
-          <h2>${selectedInvertor.marca.nume} ${selectedInvertor.serie.nume}</h2>
-          <p>Latitudine: ${selectedInvertor.latitude}</p>
-          <p>Longitudine: ${selectedInvertor.longitude}</p>
-          <p>Azimut: ${selectedInvertor.azimut}</p>
-        </div>
-      `;
-
-      infoWindowRef.current.setContent(contentString);
-      infoWindowRef.current.setPosition({
-        lat: selectedInvertor.latitude,
-        lng: selectedInvertor.longitude,
-      });
-
-      infoWindowRef.current.open(mapRef.current); // Deschide fereastra informativă pe harta stocată
-    }
-  }, [selectedInvertor]);
+  // Functie pentru navigare
+  window.viewStatistics = pesId => {
+    navigate(`/statistics/${pesId}`);
+  };
 
   return (
     <div>

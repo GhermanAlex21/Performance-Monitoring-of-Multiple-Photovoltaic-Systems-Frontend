@@ -41,6 +41,7 @@ const NavBar = () => {
                 <li><Link className="dropdown-item" to="/marca/all">All Marcas</Link></li>
                 <li><Link className="dropdown-item" to="/users/all">All Users</Link></li>
                 <li><Link className="dropdown-item" to="/invertor/all">All Invertors</Link></li>
+                <li><Link className="dropdown-item" to="/chart">Grafic</Link></li>
               </ul>
             </li>
             <li className="nav-item">
