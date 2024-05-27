@@ -22,10 +22,7 @@ import ProfileView from '../components/ProfieView';
 import ProfileUpdate from '../components/ProfileUpdate';
 import SolarDataChart from '../components/SolarDataChart';
 import InvertorDataChart from '../components/InvertorDataChart';
-
-
-
-
+import CompareInverters from '../components/CompareInverters'; // Import the new component
 
 const App = () => {
     return (
@@ -52,6 +49,8 @@ const App = () => {
                         <Route path ="/update-profile" element={<ProfileUpdate/>}/>
                         <Route path ="/chart" element={<SolarDataChart/>}/>
                         <Route path ="/statistics/:pesId" element={<InvertorDataChart/>}/>
+                        <Route path="/compare" element={<CompareInverters />} />
+                        <Route path="/compare/:id1/:id2/:marca1/:serie1/:marca2/:serie2" element={<CompareInverters />} /> {/* Add this route */}
                     </Route>
                 </Routes>
             </div>

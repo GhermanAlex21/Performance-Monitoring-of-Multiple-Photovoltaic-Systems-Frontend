@@ -1,0 +1,49 @@
+.highlight {
+    font-weight: bold;
+    color: green;
+}
+
+.highlight-red {
+    font-weight: bold;
+    color: red;
+}
+
+.ant-table-thead > tr > th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #d9d9d9;
+}
+
+.ant-table-tbody > tr > td {
+    text-align: center;
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.select-inverters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.select-inverters .ant-select {
+    width: 200px;
+}
+
+.compare-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.compare-header {
+    text-align: center;
+    margin-bottom: 20px;
+}

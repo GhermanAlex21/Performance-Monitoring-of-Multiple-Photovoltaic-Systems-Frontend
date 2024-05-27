@@ -24,19 +24,25 @@ const InvertorDataChart = () => {
         setLoading(true);
         setError(null);
         const url = `http://localhost:8000/${period}/${pesId}?limit=${recordLimit}`;
+        console.log(`Fetching data from URL: ${url}`); // Debugging line
         try {
             const response = await axios.get(url);
+            console.log('API response:', response.data); // Debugging line
             if (response.data && Object.keys(response.data).length) {
-                const labels = Object.keys(response.data).map(key => new Date(key).toLocaleDateString());
-                const values = Object.values(response.data);
+                const periods = Object.keys(response.data).sort();
+                const values = periods.map(period => response.data[period]).slice(-recordLimit);
+                const labels = periods.map(periodKey => periodKeyFormatting(period, periodKey)).slice(-recordLimit);
                 setData({
-                    labels,
+                    labels: labels,
                     datasets: [{
                         label: `${period.charAt(0).toUpperCase() + period.slice(1)} Generation (MW)`,
                         data: values,
                         borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                        tension: 0.1
+                        fill: true,
+                        pointRadius: 3,
+                        borderWidth: 1.5
                     }]
                 });
             } else {
@@ -50,18 +56,32 @@ const InvertorDataChart = () => {
         setLoading(false);
     };
 
+    const periodKeyFormatting = (period, periodKey) => {
+        if (period === 'weekly') {
+            const [startDate, endDate] = periodKey.split(' to ');
+            return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
+        } else if (period === 'monthly') {
+            return new Date(periodKey + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+        } else {
+            return new Date(periodKey).toLocaleDateString();
+        }
+    };
+
     const options = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
             x: {
-                type: 'time',
-                time: {
-                    unit: selectedData === 'daily' ? 'day' : (selectedData === 'weekly' ? 'week' : 'month')
+                type: 'category',
+                ticks: {
+                    autoSkip: false
                 }
             },
             y: {
-                beginAtZero: true
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 100
+                }
             }
         },
         plugins: {

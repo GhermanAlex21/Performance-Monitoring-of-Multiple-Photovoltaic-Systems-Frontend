@@ -22,6 +22,15 @@ export const saveUser = async (user) => {
     };
   }
 }
+export const compareInvertors = async (id1, id2) => {
+  try {
+      const response = await api.get(`/compare?id1=${id1}&id2=${id2}`);
+      return response.data;
+  } catch (error) {
+      console.error("Eroare la compararea invertorilor:", error);
+      throw error;
+  }
+};
 
 export const getAllUsers = async() =>{
   try {

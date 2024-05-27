@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getAllInvertors } from '../utils/service';
-import { useNavigate } from 'react-router-dom';  // Asigură-te că ai importat useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
   const [invertors, setInvertors] = useState([]);
+  const [selectedInvertor1, setSelectedInvertor1] = useState(null);
+  const [selectedInvertor1Details, setSelectedInvertor1Details] = useState(null);
   const mapRef = useRef(null);
-  const navigate = useNavigate();  // Inițializează useNavigate pentru a folosi în funcția de navigare
+  const infoWindowRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,6 +33,7 @@ function HomePage() {
         position: { lat: invertor.latitude, lng: invertor.longitude },
         map: map,
         title: `${invertor.marca.nume} ${invertor.serie.nume}`,
+        icon: selectedInvertor1 === invertor.id ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' : undefined
       });
 
       marker.addListener('click', () => {
@@ -40,21 +44,45 @@ function HomePage() {
             <p>Longitudine: ${invertor.longitude}</p>
             <p>Azimut: ${invertor.azimut}</p>
             <button onclick="window.viewStatistics(${invertor.pesId})">Vizualizează Statisticile</button>
+            <button onclick="window.selectForComparison(${invertor.id}, '${invertor.marca.nume}', '${invertor.serie.nume}')">Compară</button>
           </div>
         `;
+
+        if (infoWindowRef.current) {
+          infoWindowRef.current.close();
+        }
 
         const infoWindow = new window.google.maps.InfoWindow({
           content: contentString
         });
 
+        infoWindowRef.current = infoWindow;
         infoWindow.open(map, marker);
       });
     });
+
+    map.addListener('click', () => {
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+      }
+    });
   };
 
-  // Functie pentru navigare
   window.viewStatistics = pesId => {
     navigate(`/statistics/${pesId}`);
+  };
+
+  window.selectForComparison = (invertorId, marca, serie) => {
+    if (!selectedInvertor1) {
+      setSelectedInvertor1(invertorId);
+      setSelectedInvertor1Details({ marca, serie });
+    } else if (invertorId !== selectedInvertor1) {
+      navigate(`/compare/${selectedInvertor1}/${invertorId}/${selectedInvertor1Details.marca}/${selectedInvertor1Details.serie}/${marca}/${serie}`);
+    }
+
+    if (infoWindowRef.current) {
+      infoWindowRef.current.close();
+    }
   };
 
   return (

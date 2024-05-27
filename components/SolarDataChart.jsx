@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
-import { Select, Button } from 'antd'; // Assuming Ant Design is used for the Select and Button components
+import { Select, Button } from 'antd';
 
 const SolarDataChart = () => {
     const [data, setData] = useState({ labels: [], datasets: [] });
@@ -14,7 +14,7 @@ const SolarDataChart = () => {
         { label: 'PES ID 10', value: 10 },
         // Add other PES IDs here
     ]);
-    const [recordLimit, setRecordLimit] = useState(14); // New state for limiting records
+    const [recordLimit, setRecordLimit] = useState(14);
 
     useEffect(() => {
         if (pesId !== null) {
@@ -26,8 +26,8 @@ const SolarDataChart = () => {
         const url = `http://localhost:8000/${period}/${pesId}?limit=${recordLimit}`;
         axios.get(url)
             .then(response => {
-                const periods = response.data ? Object.keys(response.data) : [];
-                const values = periods.map(period => response.data[period]).slice(-recordLimit); // Apply limit to data
+                const periods = response.data ? Object.keys(response.data).sort() : [];
+                const values = periods.map(period => response.data[period]).slice(-recordLimit);
                 const labels = periods.map(periodKey => periodKeyFormatting(period, periodKey)).slice(-recordLimit);
                 setData({
                     labels,
@@ -35,7 +35,11 @@ const SolarDataChart = () => {
                         label: `${period.charAt(0).toUpperCase() + period.slice(1)} Average Generation (MW)`,
                         data: values,
                         borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        tension: 0.1,
+                        fill: true,
+                        pointRadius: 3,
+                        borderWidth: 1.5
                     }]
                 });
             })
@@ -55,7 +59,7 @@ const SolarDataChart = () => {
 
     const handleSelectPeriod = (period) => {
         setSelectedData(period);
-        setRecordLimit(14); // Reset the record limit when changing period
+        setRecordLimit(14);
     };
 
     const options = {
@@ -71,7 +75,10 @@ const SolarDataChart = () => {
             y: {
                 beginAtZero: true,
                 ticks: {
-                    stepSize: 100
+                    stepSize: 100,
+                    callback: function(value) {
+                        return value.toFixed(2) + ' MW';
+                    }
                 }
             }
         },
@@ -99,8 +106,8 @@ const SolarDataChart = () => {
                 <button onClick={() => handleSelectPeriod('daily')}>Daily</button>
                 <button onClick={() => handleSelectPeriod('weekly')}>Weekly</button>
                 <button onClick={() => handleSelectPeriod('monthly')}>Monthly</button>
-                <Button onClick={() => setRecordLimit(recordLimit + 14)}>Show More</Button> {/* Button to increase record limit */}
-                <Button onClick={() => setRecordLimit(14)}>Reset</Button> {/* Button to reset record limit */}
+                <Button onClick={() => setRecordLimit(recordLimit + 14)}>Show More</Button>
+                <Button onClick={() => setRecordLimit(14)}>Reset</Button>
             </div>
             <h2>{`${selectedData.charAt(0).toUpperCase() + selectedData.slice(1)} Solar Generation Averages`}</h2>
             <Line data={data} options={options} />
