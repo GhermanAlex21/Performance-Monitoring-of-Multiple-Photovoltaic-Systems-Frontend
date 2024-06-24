@@ -8,35 +8,54 @@ function HomePage() {
   const [selectedInvertor1Details, setSelectedInvertor1Details] = useState(null);
   const mapRef = useRef(null);
   const infoWindowRef = useRef(null);
+  const markersRef = useRef([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       const invertorData = await getAllInvertors();
-      setInvertors(invertorData);
-      initMap(invertorData);
+      const visibleInvertors = invertorData.filter(invertor => invertor.visible); // Filtrăm doar invertoarele vizibile
+      setInvertors(visibleInvertors);
+      await initMap(visibleInvertors);
     };
 
     fetchData();
   }, []);
 
-  const initMap = (invertorData) => {
-    const map = new window.google.maps.Map(document.getElementById('map'), {
+  const initMap = async (invertorData) => {
+    // Load required libraries
+    const { Map } = await google.maps.importLibrary("maps");
+    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+    // Initialize map with a valid Map ID
+    const map = new Map(document.getElementById('map'), {
       zoom: 13,
       center: { lat: 47.6573, lng: 23.5681 },
+      mapId: '51f3d46cdbaab1df' // Replace with your actual Map ID
     });
 
     mapRef.current = map;
 
-    invertorData.forEach(invertor => {
-      const marker = new window.google.maps.Marker({
-        position: { lat: invertor.latitude, lng: invertor.longitude },
+    invertorData.forEach((invertor, index) => {
+      const markerContent = document.createElement('div');
+      markerContent.innerHTML = `<div style="background-image: url('http://maps.google.com/mapfiles/ms/icons/red-dot.png'); width: 32px; height: 32px; background-size: cover;"></div>`;
+
+      const marker = new AdvancedMarkerElement({
         map: map,
+        position: { lat: invertor.latitude, lng: invertor.longitude },
         title: `${invertor.marca.nume} ${invertor.serie.nume}`,
-        icon: selectedInvertor1 === invertor.id ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' : undefined
+        content: markerContent
       });
 
+      markersRef.current[index] = { marker, invertor };
+
       marker.addListener('click', () => {
+        markersRef.current.forEach(({ marker }) => {
+          marker.content.innerHTML = `<div style="background-image: url('http://maps.google.com/mapfiles/ms/icons/red-dot.png'); width: 32px; height: 32px; background-size: cover;"></div>`;
+        });
+
+        marker.content.innerHTML = `<div style="background-image: url('http://maps.google.com/mapfiles/ms/icons/green-dot.png'); width: 32px; height: 32px; background-size: cover;"></div>`;
+
         const contentString = `
           <div>
             <h2>${invertor.marca.nume} ${invertor.serie.nume}</h2>
@@ -52,7 +71,7 @@ function HomePage() {
           infoWindowRef.current.close();
         }
 
-        const infoWindow = new window.google.maps.InfoWindow({
+        const infoWindow = new google.maps.InfoWindow({
           content: contentString
         });
 

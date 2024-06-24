@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { getSerieById, updateSerie } from "../utils/service";
+import { getSerieById, updateSerie, getAllMarcas } from "../utils/service";
 import { useParams, Link, useNavigate } from "react-router-dom";
 
 const UpdateSerie = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [serie, setSerie] = useState("");
+  const [serie, setSerie] = useState({ nume: "", marcaId: "" });
+  const [marci, setMarci] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [serieUpdated, setSerieUpdated] = useState(false); 
+  const [serieUpdated, setSerieUpdated] = useState(false);
 
   useEffect(() => {
     fetchSerie();
+    fetchMarci();
   }, []);
 
   const fetchSerie = async () => {
     try {
       const serieToUpdate = await getSerieById(id);
       if (serieToUpdate) {
-        setSerie(serieToUpdate.nume || "");
+        setSerie({
+          nume: serieToUpdate.nume || "",
+          marcaId: serieToUpdate.marca?.id || ""
+        });
       }
       setIsLoading(false);
     } catch (error) {
@@ -25,21 +30,35 @@ const UpdateSerie = () => {
     }
   };
 
-  const handleSerieChange = (e) => {
-    setSerie(e.target.value);
+  const fetchMarci = async () => {
+    try {
+      const marciData = await getAllMarcas();
+      setMarci(marciData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSerie((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       const updatedSerie = {
-        nume: serie
+        nume: serie.nume,
+        marca: { id: serie.marcaId }
       };
       await updateSerie(id, updatedSerie);
-      setSerieUpdated(true); 
+      setSerieUpdated(true);
       setTimeout(() => {
         navigate("/serie/all");
-      }, 2000); 
+      }, 2000);
     } catch (error) {
       console.error(error);
     }
@@ -61,11 +80,27 @@ const UpdateSerie = () => {
             <input
               type="text"
               className="form-control mb-4"
-              value={serie}
-              onChange={handleSerieChange}
+              name="nume"
+              value={serie.nume}
+              onChange={handleInputChange}
             />
           </div>
-
+          <div className="form-group">
+            <label className="text-info">Marca:</label>
+            <select
+              name="marcaId"
+              className="form-control mb-4"
+              value={serie.marcaId}
+              onChange={handleInputChange}
+            >
+              <option value="">Selectează Marca</option>
+              {marci.map((marca) => (
+                <option key={marca.id} value={marca.id}>
+                  {marca.nume}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="btn-group">
             <button type="submit" className="btn btn-sm btn-outline-warning">
               Update Serie

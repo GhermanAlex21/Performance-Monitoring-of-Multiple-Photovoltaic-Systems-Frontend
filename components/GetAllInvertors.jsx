@@ -9,6 +9,7 @@ const GetAllInvertors = () => {
   const [isInvertorDeleted, setIsInvertorDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
     setIsAdmin(role === 'ADMIN');
@@ -62,22 +63,24 @@ const GetAllInvertors = () => {
       {invertors.map((invertor, index) => (
         <div key={invertor.id}>
           <pre>
-            <h4 style={{ color: "GrayText" }}>{`${index + 1}. Marca: ${invertor.marca.nume}, Serie: ${invertor.serie.nume}`}</h4>
+            <h4 style={{ color: "GrayText" }}>
+              {`${index + 1}. Marca: ${invertor.marca.nume}, Serie: ${invertor.serie.nume}, Proprietar: ${invertor.user.nume} ${invertor.user.prenume}`}
+            </h4>
           </pre>
           {isAdmin && (
-          <div className="btn-group mb-4">
-            <Link to={`/invertor/update/${invertor.id}`}>
-              <button className="btn btn-sm btn-outline-warning mr-2">
-                <FaEdit /> Update Invertor
+            <div className="btn-group mb-4">
+              <Link to={`/invertor/update/${invertor.id}`}>
+                <button className="btn btn-sm btn-outline-warning mr-2">
+                  <FaEdit /> Update Invertor
+                </button>
+              </Link>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleDeleteInvertor(invertor.id)}
+              >
+                <FaTrash /> Delete Invertor
               </button>
-            </Link>
-            <button
-              className="btn btn-sm btn-outline-danger"
-              onClick={() => handleDeleteInvertor(invertor.id)}
-            >
-              <FaTrash /> Delete Invertor
-            </button>
-          </div>
+            </div>
           )}
         </div>
       ))}

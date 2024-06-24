@@ -79,14 +79,19 @@ export const updateMarca = async (id, updatedMarca) => {
     throw error;
   }
 }
+export const getSeriesByMarcaId = async (marcaId) => {
+  const response = await api.get(`/serii/by-marca/${marcaId}`);
+  return response.data;
+};
+
 
 export const updateSerie = async (id, updatedSerie) => {
   try {
-    const response = await api.put(`/update_serie/${id}`, updatedSerie);
-    return response.data;
+      const response = await api.put(`/update_serie/${id}`, updatedSerie);
+      return response.data;
   } catch (error) {
-    console.error("Eroare la actualizarea seriei:", error);
-    throw error;
+      console.error("Eroare la actualizarea seriei:", error);
+      throw error;
   }
 }
 

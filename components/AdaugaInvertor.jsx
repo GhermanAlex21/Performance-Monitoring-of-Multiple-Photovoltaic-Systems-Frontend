@@ -1,24 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { saveInvertor, getAllSeries, getAllMarcas } from '../utils/service';
+import { saveInvertor, getAllMarcas, getSeriesByMarcaId, getAllUsers } from '../utils/service'; // Importăm getAllUsers
+import '../src/AddInvertor.css';
 
 const AdaugaInvertor = () => {
     const [selectedSerie, setSelectedSerie] = useState('');
     const [selectedMarca, setSelectedMarca] = useState('');
+    const [selectedUser, setSelectedUser] = useState(''); // Nou câmp pentru utilizator
     const [latitude, setLatitude] = useState('');
     const [longitude, setLongitude] = useState('');
     const [azimut, setAzimut] = useState('');
-    const [pesId, setPesId] = useState('');
     const [serii, setSerii] = useState([]);
     const [marci, setMarci] = useState([]);
+    const [users, setUsers] = useState([]); // Nou câmp pentru utilizatori
+    const [visibility, setVisibility] = useState(''); // Nou câmp pentru vizibilitate
     const mapRef = useRef(null);
     const markerRef = useRef(null);
 
+    const availablePesIds = [0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
     useEffect(() => {
         const fetchData = async () => {
-            const seriiData = await getAllSeries();
             const marciData = await getAllMarcas();
-            setSerii(seriiData);
             setMarci(marciData);
+            const usersData = await getAllUsers(); // Fetch utilizatori
+            setUsers(usersData);
         };
         fetchData();
     }, []);
@@ -61,9 +66,13 @@ const AdaugaInvertor = () => {
         setLongitude('');
     };
 
+    const getRandomPesId = () => {
+        return availablePesIds[Math.floor(Math.random() * availablePesIds.length)];
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedSerie || !selectedMarca || !latitude || !longitude || !azimut || !pesId) {
+        if (!selectedSerie || !selectedMarca || !latitude || !longitude || !azimut || !selectedUser || !visibility) {
             alert('Te rog să completezi toate câmpurile.');
             return;
         }
@@ -75,40 +84,69 @@ const AdaugaInvertor = () => {
                 latitude: parseFloat(latitude),
                 longitude: parseFloat(longitude),
                 azimut: parseFloat(azimut),
-                pesId: parseInt(pesId)
+                userId: selectedUser,
+                visible: visibility === 'public',
+                pesId: getRandomPesId()
             };
             const response = await saveInvertor(invertorData);
             console.log('Invertor adăugat:', response);
             alert('Invertor adăugat cu succes!');
+
+            // Reset fields after successful submission
+            setSelectedSerie('');
+            setSelectedMarca('');
+            setLatitude('');
+            setLongitude('');
+            setAzimut('');
+            setSelectedUser('');
+            setVisibility('');
+            setSerii([]);
+            if (markerRef.current) {
+                markerRef.current.setMap(null);
+            }
         } catch (error) {
             console.error('Eroare la adăugarea invertorului:', error);
             alert('A apărut o eroare la adăugarea invertorului. Te rog să încerci din nou mai târziu.');
         }
     };
 
+    const handleMarcaChange = async (e) => {
+        const marcaId = e.target.value;
+        setSelectedMarca(marcaId);
+        setSelectedSerie(''); // Resetează seria selectată
+        if (marcaId) {
+            const seriiData = await getSeriesByMarcaId(marcaId);
+            setSerii(seriiData);
+        } else {
+            setSerii([]);
+        }
+    };
+
     return (
-        <div>
+        <div className="adauga-invertor-container">
             <h2>Adăugare Invertor</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="serie">Serie:</label>
-                    <select id="serie" value={selectedSerie} onChange={(e) => setSelectedSerie(e.target.value)}>
-                        <option value="">Selectează Serie</option>
-                        {serii.map((serie) => (
-                            <option key={serie.id} value={serie.id}>{serie.nume}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
+            <form onSubmit={handleSubmit} className="adauga-invertor-form">
+                <div className="form-group">
                     <label htmlFor="marca">Marca:</label>
-                    <select id="marca" value={selectedMarca} onChange={(e) => setSelectedMarca(e.target.value)}>
+                    <select id="marca" value={selectedMarca} onChange={handleMarcaChange}>
                         <option value="">Selectează Marca</option>
                         {marci.map((marca) => (
                             <option key={marca.id} value={marca.id}>{marca.nume}</option>
                         ))}
                     </select>
                 </div>
-                <div>
+                {selectedMarca && (
+                    <div className="form-group">
+                        <label htmlFor="serie">Serie:</label>
+                        <select id="serie" value={selectedSerie} onChange={(e) => setSelectedSerie(e.target.value)}>
+                            <option value="">Selectează Serie</option>
+                            {serii.map((serie) => (
+                                <option key={serie.id} value={serie.id}>{serie.nume}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                <div className="form-group">
                     <label htmlFor="latitude">Latitudine:</label>
                     <input
                         type="text"
@@ -118,7 +156,7 @@ const AdaugaInvertor = () => {
                         readOnly
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label htmlFor="longitude">Longitudine:</label>
                     <input
                         type="text"
@@ -128,7 +166,7 @@ const AdaugaInvertor = () => {
                         readOnly
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label htmlFor="azimut">Azimut:</label>
                     <input
                         type="number"
@@ -137,20 +175,29 @@ const AdaugaInvertor = () => {
                         onChange={(e) => setAzimut(e.target.value)}
                     />
                 </div>
-                <div>
-                    <label htmlFor="pesId">Pes ID:</label>
-                    <input
-                        type="number"
-                        id="pesId"
-                        value={pesId}
-                        onChange={(e) => setPesId(e.target.value)}
-                        required
-                    />
+                <div className="form-group">
+                    <label htmlFor="user">Utilizator:</label>
+                    <select id="user" value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
+                        <option value="">Selectează Utilizator</option>
+                        {users.map((user) => (
+                            <option key={user.id} value={user.id}>{user.nume} {user.prenume}</option>
+                        ))}
+                    </select>
                 </div>
-                <button type="button" onClick={handleResetMap}>Resetare Locație</button>
-                <button type="submit">Adaugă Invertor</button>
+                <div className="form-group">
+                    <label htmlFor="visibility">Vizibilitate:</label>
+                    <select id="visibility" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
+                        <option value="">Selectează Vizibilitate</option>
+                        <option value="public">Public</option>
+                        <option value="private">Privat</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <button type="button" onClick={handleResetMap} className="btn btn-secondary">Resetare Locație</button>
+                    <button type="submit" className="btn btn-primary">Adaugă Invertor</button>
+                </div>
             </form>
-            <div id="map" style={{ height: '400px', width: '100%' }}></div>
+            <div id="map" style={{ height: '600px', width: '100%' }}></div>
         </div>
     );
 };

@@ -1,119 +1,125 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
-import 'chartjs-adapter-date-fns';
-import { Select, Button } from 'antd';
 import { useParams } from 'react-router-dom';
+import * as am4core from '@amcharts/amcharts4/core';
+import * as am4charts from '@amcharts/amcharts4/charts';
+import am4themes_animated from '@amcharts/amcharts4/themes/animated';
+
+am4core.useTheme(am4themes_animated);
 
 const InvertorDataChart = () => {
-    const [data, setData] = useState({ labels: [], datasets: [] });
-    const [selectedData, setSelectedData] = useState('daily');
+    const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const { pesId } = useParams();
-    const [recordLimit, setRecordLimit] = useState(14);
+    const [amChart, setAmChart] = useState(null);
 
     useEffect(() => {
         if (pesId) {
-            fetchData(selectedData);
+            fetchData();
         }
-    }, [pesId, selectedData, recordLimit]);
+    }, [pesId]);
 
-    const fetchData = async (period) => {
+    useEffect(() => {
+        if (chartData.length > 0) {
+            createAmChart();
+        }
+    }, [chartData]);
+
+    const fetchData = async () => {
         setLoading(true);
         setError(null);
-        const url = `http://localhost:8000/${period}/${pesId}?limit=${recordLimit}`;
-        console.log(`Fetching data from URL: ${url}`); // Debugging line
+        const url = `http://localhost:8000/daily/${pesId}`;
         try {
             const response = await axios.get(url);
-            console.log('API response:', response.data); // Debugging line
             if (response.data && Object.keys(response.data).length) {
                 const periods = Object.keys(response.data).sort();
-                const values = periods.map(period => response.data[period]).slice(-recordLimit);
-                const labels = periods.map(periodKey => periodKeyFormatting(period, periodKey)).slice(-recordLimit);
-                setData({
-                    labels: labels,
-                    datasets: [{
-                        label: `${period.charAt(0).toUpperCase() + period.slice(1)} Generation (MW)`,
-                        data: values,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1,
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                        fill: true,
-                        pointRadius: 3,
-                        borderWidth: 1.5
-                    }]
-                });
+                const data = periods.map(periodKey => ({
+                    date: new Date(periodKey),
+                    value: response.data[periodKey]
+                }));
+                setChartData(data);
             } else {
                 setError('No data available');
-                setData({ labels: [], datasets: [] });
+                setChartData([]);
             }
         } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
-            console.error('Error fetching data:', error);
         }
         setLoading(false);
     };
 
-    const periodKeyFormatting = (period, periodKey) => {
-        if (period === 'weekly') {
-            const [startDate, endDate] = periodKey.split(' to ');
-            return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
-        } else if (period === 'monthly') {
-            return new Date(periodKey + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-        } else {
-            return new Date(periodKey).toLocaleDateString();
+    const createAmChart = () => {
+        if (amChart) {
+            amChart.dispose();
         }
-    };
 
-    const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                type: 'category',
-                ticks: {
-                    autoSkip: false
-                }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 100
-                }
-            }
-        },
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: tooltipItem => `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y.toFixed(2)} MW`
-                }
-            }
+        let chart = am4core.create('chartdiv', am4charts.XYChart);
+        setAmChart(chart);
+
+        chart.paddingRight = 20;
+
+        chart.data = chartData;
+
+        let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+        let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.tooltip.disabled = true;
+
+        // Add unit to the labels
+        valueAxis.renderer.labels.template.adapter.add("text", function (text) {
+            return text + " MW";
+        });
+
+        // Ensure all dates are shown, but only show labels every 3 days
+        dateAxis.renderer.minGridDistance = 30;
+        dateAxis.baseInterval = { timeUnit: "day", count: 1 };
+        dateAxis.skipEmptyPeriods = false;
+        dateAxis.renderer.grid.template.location = 0;
+        dateAxis.renderer.fullWidthTooltip = true;
+        dateAxis.renderer.labels.template.adapter.add("text", function (text, target) {
+            let date = new Date(target.dataItem.value);
+            return date.getDate() % 3 === 0 ? text : "";
+        });
+
+        let series = chart.series.push(new am4charts.LineSeries());
+        series.dataFields.dateX = 'date';
+        series.dataFields.valueY = 'value';
+        series.tooltipText = 'Date: {dateX.formatDate("yyyy-MM-dd")}\nValue: {valueY.value} MW';
+        series.strokeWidth = 2;
+        series.minBulletDistance = 15;
+
+        series.tooltip.pointerOrientation = 'vertical';
+
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.xAxis = dateAxis;
+
+        let scrollbarX = new am4charts.XYChartScrollbar();
+        scrollbarX.series.push(series);
+        scrollbarX.marginBottom = 20; // Adjust scrollbar margin
+        chart.scrollbarX = scrollbarX;
+
+        // Show labels every 3 days in scrollbar
+        let sbDateAxis = scrollbarX.scrollbarChart.xAxes.getIndex(0);
+        if (sbDateAxis) {
+            sbDateAxis.renderer.labels.template.adapter.add("text", function (text, target) {
+                let date = new Date(target.dataItem.value);
+                return date.getDate() % 3 === 0 ? text : "";
+            });
         }
+
+        // Extend the line to the end of the container
+        dateAxis.startLocation = 0.5;
+        dateAxis.endLocation = 1;
+
+        chart.events.on('ready', function () {
+            dateAxis.zoom({ start: 0.79, end: 1 });
+        });
     };
 
     return (
-        <div style={{ height: '400px', width: '100%' }}>
-            {error && <div style={{ color: 'red' }}>{error}</div>}
-            <Select
-                style={{ width: 200 }}
-                value={selectedData}
-                onChange={setSelectedData}
-                options={[
-                    { value: 'daily', label: 'Daily' },
-                    { value: 'weekly', label: 'Weekly' },
-                    { value: 'monthly', label: 'Monthly' }
-                ]}
-            />
-            <Button onClick={() => setRecordLimit(r => r + 14)}>Show More</Button>
-            <Button onClick={() => setRecordLimit(14)}>Reset</Button>
-            <h2>{`${selectedData.charAt(0).toUpperCase() + selectedData.slice(1)} Solar Generation Data for Invertor ${pesId || 'Not specified'}`}</h2>
-            {!loading && data.labels.length > 0 ? (
-                <Line data={data} options={options} />
-            ) : (
-                <div>Loading data...</div>
-            )}
+        <div>
+            <h2>Daily Solar Generation Data</h2>
+            <div id="chartdiv" style={{ width: '100%', height: '500px' }}></div>
         </div>
     );
 };

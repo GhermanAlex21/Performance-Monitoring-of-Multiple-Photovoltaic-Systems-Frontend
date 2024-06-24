@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveUser } from '../utils/service'; // Verifică să fie calea corectă pentru import
+import '../src/AddUser.css';
 
 const AddUser = () => {
     const [userData, setUserData] = useState({
@@ -22,30 +23,38 @@ const AddUser = () => {
     };
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const { success, data, status } = await saveUser(userData);
-        console.log("Server response:", data, "Status code:", status);
-    
-        if (success) {
-          alert('Utilizatorul a fost adăugat cu succes!');
-          navigate('/login');
-        } else if (status === 400 && data.message === "Username already exists") {
-          setError("Username-ul ales este deja folosit. Te rugăm să alegi un altul.");
-        } else {
-          throw new Error(data.message || "Failed to create user");
+        e.preventDefault();
+        try {
+            const { success, data, status } = await saveUser(userData);
+            console.log("Server response:", data, "Status code:", status);
+
+            if (success) {
+                alert('Utilizatorul a fost adăugat cu succes!');
+                setUserData({ // Reset fields after successful submission
+                    username: '',
+                    password: '',
+                    nume: '',
+                    prenume: '',
+                    telefon: ''
+                });
+                setError('');
+            } else if (status === 400 && data.message === "Username already exists") {
+                setError("Username-ul ales este deja folosit. Te rugăm să alegi un altul.");
+            } else {
+                throw new Error(data.message || "Failed to create user");
+            }
+        } catch (error) {
+            console.error('Error adding user:', error.message);
+            setError(error.message || 'A apărut o eroare la adăugarea utilizatorului.');
         }
-      } catch (error) {
-        console.error('Error adding user:', error.message);
-        setError(error.message || 'A apărut o eroare la adăugarea utilizatorului.');
-      }
     };
+
     return (
-        <div>
+        <div className="add-user-container">
             <h2>Adăugare Utilizator</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
+            {error && <p className="error-message">{error}</p>}
+            <form onSubmit={handleSubmit} className="add-user-form">
+                <div className="form-group">
                     <label>Nume:</label>
                     <input
                         type="text"
@@ -55,7 +64,7 @@ const AddUser = () => {
                         required
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label>Prenume:</label>
                     <input
                         type="text"
@@ -65,7 +74,7 @@ const AddUser = () => {
                         required
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label>Telefon:</label>
                     <input
                         type="text"
@@ -74,7 +83,7 @@ const AddUser = () => {
                         onChange={handleChange}
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label>Username:</label>
                     <input
                         type="text"
@@ -84,7 +93,7 @@ const AddUser = () => {
                         required
                     />
                 </div>
-                <div>
+                <div className="form-group">
                     <label>Password:</label>
                     <input
                         type="password"
@@ -94,7 +103,7 @@ const AddUser = () => {
                         required
                     />
                 </div>
-                <button type="submit">Creează Cont</button>
+                <button type="submit" className="btn btn-primary">Creează Cont</button>
             </form>
         </div>
     );
