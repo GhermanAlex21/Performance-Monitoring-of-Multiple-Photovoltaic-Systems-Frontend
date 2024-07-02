@@ -67,11 +67,13 @@ const GetAllSeries = () => {
         <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
           <h4>All Serii</h4>
         </div>
-        <div className="col-md-4 d-flex justify-content-end">
-          <Link to={"/series/add"}>
-            <FaPlus /> Add Serie
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="col-md-4 d-flex justify-content-end">
+            <Link to={"/series/add"}>
+              <FaPlus /> Add Serie
+            </Link>
+          </div>
+        )}
       </div>
       <div className="row mt-3">
         <div className="col-md-4">

@@ -38,6 +38,11 @@ const AddUser = () => {
                     telefon: ''
                 });
                 setError('');
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login'); // Redirecționăm către pagina de login doar dacă nu este autentificat
+                }
             } else if (status === 400 && data.message === "Username already exists") {
                 setError("Username-ul ales este deja folosit. Te rugăm să alegi un altul.");
             } else {

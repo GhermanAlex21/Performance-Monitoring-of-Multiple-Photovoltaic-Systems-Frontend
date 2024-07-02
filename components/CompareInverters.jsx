@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInvertors, compareInvertors } from '../utils/service';
-import { Select, Button, Table, message } from 'antd';
+import { Select, Table, message } from 'antd';
 import { useParams } from 'react-router-dom';
 import '../src/CompareInverters.css';
 
@@ -160,8 +160,8 @@ const CompareInverters = () => {
                     style={{ marginRight: 10 }}
                 >
                     {invertors.map(invertor => (
-                        <Option key={invertor.id} value={invertor.id}>
-                            {invertor.marca.nume} {invertor.serie.nume}
+                        <Option key={invertor.id} value={invertor.id} title={`${invertor.marca.nume} ${invertor.serie.nume} (ID: ${invertor.id})`}>
+                            {invertor.marca.nume} {invertor.serie.nume} (ID: {invertor.id})
                         </Option>
                     ))}
                 </Select>
@@ -176,14 +176,11 @@ const CompareInverters = () => {
                     style={{ marginRight: 10 }}
                 >
                     {invertors.map(invertor => (
-                        <Option key={invertor.id} value={invertor.id}>
-                            {invertor.marca.nume} {invertor.serie.nume}
+                        <Option key={invertor.id} value={invertor.id} title={`${invertor.marca.nume} ${invertor.serie.nume} (ID: ${invertor.id})`}>
+                            {invertor.marca.nume} {invertor.serie.nume} (ID: {invertor.id})
                         </Option>
                     ))}
                 </Select>
-                <Button type="primary" onClick={handleCompare} loading={loading}>
-                    Compare
-                </Button>
             </div>
             {comparisonData && (
                 <div style={{ marginTop: 20 }}>

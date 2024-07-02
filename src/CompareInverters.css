@@ -47,3 +47,28 @@
     text-align: center;
     margin-bottom: 20px;
 }
+.ant-select-dropdown-menu-item {
+    position: relative;
+}
+
+.ant-select-dropdown-menu-item:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #000;
+    color: #fff;
+    padding: 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+
+
+
+
+
+
+

@@ -87,6 +87,7 @@ const InvertorDataChart = () => {
         series.tooltipText = 'Date: {dateX.formatDate("yyyy-MM-dd")}\nValue: {valueY.value} MW';
         series.strokeWidth = 2;
         series.minBulletDistance = 15;
+        series.fillOpacity = 0.5; // Fill the area under the line
 
         series.tooltip.pointerOrientation = 'vertical';
 

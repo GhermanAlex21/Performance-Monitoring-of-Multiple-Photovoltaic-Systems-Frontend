@@ -42,7 +42,8 @@ const NavBar = () => {
                 <li><Link className="dropdown-item" to="/users/all">All Users</Link></li>
                 <li><Link className="dropdown-item" to="/invertor/all">All Invertors</Link></li>
                 <li><Link className="dropdown-item" to="/chart">Grafic</Link></li>
-                <li><Link className="dropdown-item" to="/compare">Compare Inverters</Link></li> {/* Add this line */}
+                <li><Link className="dropdown-item" to="/compare">Compare Inverters</Link></li>
+                <li><Link className="dropdown-item" to="/my-inverters">My Inverters</Link></li> {/* Added this line */}
               </ul>
             </li>
             <li className="nav-item">

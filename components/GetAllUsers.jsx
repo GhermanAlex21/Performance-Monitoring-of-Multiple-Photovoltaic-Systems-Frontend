@@ -9,8 +9,9 @@ const GetAllUsers = () => {
   const [isUserDeleted, setIsUserDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  
   useEffect(() => {
-    const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
+    const role = localStorage.getItem('role'); // Assuming role is stored as 'ADMIN' or 'USER'
     setIsAdmin(role === 'ADMIN');
     fetchUsers();
   }, []);
@@ -49,13 +50,15 @@ const GetAllUsers = () => {
         <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
           <h4>All Users</h4>
         </div>
-        <div className="col-md-6 d-flex justify-content-end">
-          <Link to={"/user-save"}>
-            <button className="btn btn-sm btn-outline-success mr-2">
-              <FaPlus /> Add User
-            </button>
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="col-md-6 d-flex justify-content-end">
+            <Link to={"/user-save"}>
+              <button className="btn btn-sm btn-outline-success mr-2">
+                <FaPlus /> Add User
+              </button>
+            </Link>
+          </div>
+        )}
       </div>
       <hr />
       {isUserDeleted && (
@@ -69,19 +72,19 @@ const GetAllUsers = () => {
             </h4>
           </pre>
           {isAdmin && (
-          <div className="btn-group">
-            <Link to={`/user/update/${user.id}`}>
-              <button className="btn btn-sm btn-outline-warning">
-                <FaEdit /> Update User
+            <div className="btn-group">
+              <Link to={`/user/update/${user.id}`}>
+                <button className="btn btn-sm btn-outline-warning">
+                  <FaEdit /> Update User
+                </button>
+              </Link>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleDeleteUser(user.id)}
+              >
+                <FaTrash /> Delete User
               </button>
-            </Link>
-            <button
-              className="btn btn-sm btn-outline-danger"
-              onClick={() => handleDeleteUser(user.id)}
-            >
-              <FaTrash /> Delete User
-            </button>
-          </div>
+            </div>
           )}
         </div>
       ))}

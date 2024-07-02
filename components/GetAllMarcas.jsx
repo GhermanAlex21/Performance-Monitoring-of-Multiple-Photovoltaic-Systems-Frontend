@@ -9,6 +9,7 @@ const GetAllMarcas = () => {
   const [isMarcaDeleted, setIsMarcaDeleted] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const role = localStorage.getItem('role'); // Presupunând că rolul este stocat ca 'ADMIN' sau 'USER'
     setIsAdmin(role === 'ADMIN');
@@ -49,11 +50,13 @@ const GetAllMarcas = () => {
         <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
           <h4>All Marci</h4>
         </div>
-        <div className="col-md-4 d-flex justify-content-end">
-          <Link to={"/marca/add"}>
-            <FaPlus /> Add Marca
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="col-md-4 d-flex justify-content-end">
+            <Link to={"/marca/add"}>
+              <FaPlus /> Add Marca
+            </Link>
+          </div>
+        )}
       </div>
       <hr />
       {isMarcaDeleted && (
@@ -65,16 +68,16 @@ const GetAllMarcas = () => {
             <h4 style={{ color: "GrayText" }}>{`${index + 1}. ${marca.nume}`}</h4>
           </pre>
           {isAdmin && (
-          <div className="btn-group mb-4">
-            <Link to={`/update-marca/${marca.id}`}>
-              <button className="btn btn-sm btn-outline-warning mr-2">Edit Marca</button>
-            </Link>
-            <button
-              className="btn btn-sm btn-outline-danger"
-              onClick={() => handleDeleteMarca(marca.id)}>
-              Delete Marca
-            </button>
-          </div>
+            <div className="btn-group mb-4">
+              <Link to={`/update-marca/${marca.id}`}>
+                <button className="btn btn-sm btn-outline-warning mr-2">Edit Marca</button>
+              </Link>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleDeleteMarca(marca.id)}>
+                Delete Marca
+              </button>
+            </div>
           )}
         </div>
       ))}

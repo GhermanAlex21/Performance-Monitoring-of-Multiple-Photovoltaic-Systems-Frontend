@@ -24,6 +24,7 @@ import SolarDataChart from '../components/SolarDataChart';
 import InvertorDataChart from '../components/InvertorDataChart';
 import CompareInverters from '../components/CompareInverters'; // Import the new component
 import SolarPanelDataComponent from '../components/SolarPanelDataComponent';
+import MyInverters from '../components/MyInverters';
 
 const App = () => {
     return (
@@ -53,6 +54,7 @@ const App = () => {
                         <Route path="/compare" element={<CompareInverters />} />
                         <Route path="/compare/:id1/:id2/:marca1/:serie1/:marca2/:serie2" element={<CompareInverters />} /> 
                         <Route path="/live" element={<SolarPanelDataComponent/>}/>
+                        <Route path="/my-inverters" element={<MyInverters />} />
                     </Route>
                 </Routes>
             </div>

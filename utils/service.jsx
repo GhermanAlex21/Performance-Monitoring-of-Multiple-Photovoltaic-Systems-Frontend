@@ -206,6 +206,10 @@ export const updateInvertor = async (id, updatedInvertor) => {
     throw error;
   }
 }
+export const getUserInverters = async (userId) => {
+  const response = await axios.get(`http://localhost:8000/user/${userId}/inverters`);
+  return response.data;
+};
 export const getInvertorById = async (id) => {
   try {
     const response = await api.get(`/invertors/${id}`);
@@ -240,6 +244,30 @@ export const updateUser = async (id, updatedUser) => {
   } catch (error) {
     console.error("Eroare la actualizarea utilizatorului:", error);
     throw error;
+  }
+}
+export function parseJwt(token) {
+  try {
+      return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  } catch (e) {
+      return null;
+  }
+}
+export const getComparisonDataForSingleInvertor = async (pesId) => {
+  try {
+      const response = await axios.get(`http://localhost:8000/getComparisonData/${pesId}`);
+      return response.data;
+  } catch (error) {
+      console.error('Error fetching comparison data:', error);
+      throw new Error('Failed to fetch comparison data');
+  }
+}
+export const updateInverterVisibility = async (id, visible) => {
+  try {
+      await axios.put(`http://localhost:8000/invertors/update-visibility/${id}`, { visible });
+  } catch (error) {
+      console.error('Error updating inverter visibility:', error);
+      throw new Error('Failed to update inverter visibility');
   }
 }
 

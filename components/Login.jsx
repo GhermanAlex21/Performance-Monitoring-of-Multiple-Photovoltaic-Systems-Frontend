@@ -1,3 +1,4 @@
+// Componenta Login.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -26,6 +27,7 @@ const Login = () => {
             localStorage.setItem('token', response.data);
             if (decodedToken) {
                 localStorage.setItem('role', decodedToken.role); // Modifică aici
+                localStorage.setItem('userId', decodedToken.userId); // Adaugă aici stocarea userId
             }
             navigate('/');
         } catch (error) {

@@ -50,11 +50,13 @@ const GetAllInvertors = () => {
         <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
           <h4>All Invertors</h4>
         </div>
-        <div className="col-md-4 d-flex justify-content-end">
-          <Link to={"/invertor/add"}>
-            <FaPlus /> Add Invertor
-          </Link>
-        </div>
+        {isAdmin && (
+          <div className="col-md-4 d-flex justify-content-end">
+            <Link to={"/invertor/add"}>
+              <FaPlus /> Add Invertor
+            </Link>
+          </div>
+        )}
       </div>
       <hr />
       {isInvertorDeleted && (

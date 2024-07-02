@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import 'chart.js/auto';
@@ -15,12 +15,22 @@ const SolarDataChart = () => {
         // Add other PES IDs here
     ]);
     const [recordLimit, setRecordLimit] = useState(14);
+    const [realtimeData, setRealtimeData] = useState({});
+    const wsRef = useRef(null);
 
     useEffect(() => {
-        if (pesId !== null) {
+        if (pesId !== null && selectedData !== 'realtime') {
             fetchData(selectedData);
         }
     }, [pesId, selectedData, recordLimit]);
+
+    useEffect(() => {
+        if (selectedData === 'realtime') {
+            connectWebSocket();
+        } else {
+            if (wsRef.current) wsRef.current.close();
+        }
+    }, [selectedData]);
 
     const fetchData = (period) => {
         const url = `http://localhost:8000/${period}/${pesId}?limit=${recordLimit}`;
@@ -46,6 +56,39 @@ const SolarDataChart = () => {
             .catch(error => console.error(`Error fetching ${period} data:`, error));
     };
 
+    const connectWebSocket = () => {
+        if (wsRef.current) wsRef.current.close();
+        const ws = new WebSocket('ws://localhost:8000/sockets');
+
+        ws.onopen = () => {
+            console.log('WebSocket connection opened');
+        };
+
+        ws.onmessage = (event) => {
+            console.log('WebSocket message received:', event.data);
+            const updatedData = JSON.parse(event.data);
+            setRealtimeData(prevData => {
+                const newData = { ...prevData };
+                if (!newData[updatedData.pesId]) {
+                    newData[updatedData.pesId] = [];
+                }
+                newData[updatedData.pesId] = [...newData[updatedData.pesId].filter(data => data.datetimeGMT !== updatedData.datetimeGMT), updatedData];
+                return newData;
+            });
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        ws.onclose = (event) => {
+            console.log('WebSocket connection closed', event);
+            setTimeout(() => connectWebSocket(), 5000);
+        };
+
+        wsRef.current = ws;
+    };
+
     const periodKeyFormatting = (period, periodKey) => {
         if (period === 'weekly') {
             const [startDate, endDate] = periodKey.split(' to ');
@@ -62,6 +105,20 @@ const SolarDataChart = () => {
         setRecordLimit(14);
     };
 
+    const realtimeChartData = {
+        labels: (realtimeData[pesId] || []).map(item => new Date(item.datetimeGMT).toLocaleTimeString()),
+        datasets: [{
+            label: 'Real-time Generation (MW)',
+            data: (realtimeData[pesId] || []).map(item => item.generationMW),
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            tension: 0.1,
+            fill: true,
+            pointRadius: 3,
+            borderWidth: 1.5
+        }]
+    };
+
     const options = {
         responsive: true,
         maintainAspectRatio: false,
@@ -76,7 +133,7 @@ const SolarDataChart = () => {
                 beginAtZero: true,
                 ticks: {
                     stepSize: 100,
-                    callback: function(value) {
+                    callback: function (value) {
                         return value.toFixed(2) + ' MW';
                     }
                 }
@@ -84,11 +141,17 @@ const SolarDataChart = () => {
         },
         plugins: {
             tooltip: {
+                mode: 'index',
+                intersect: false,
                 callbacks: {
-                    label: function(tooltipItem) {
+                    label: function (tooltipItem) {
                         return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y.toFixed(2)} MW`;
                     }
                 }
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: false
             }
         }
     };
@@ -106,11 +169,12 @@ const SolarDataChart = () => {
                 <button onClick={() => handleSelectPeriod('daily')}>Daily</button>
                 <button onClick={() => handleSelectPeriod('weekly')}>Weekly</button>
                 <button onClick={() => handleSelectPeriod('monthly')}>Monthly</button>
+                <button onClick={() => handleSelectPeriod('realtime')}>Real-time</button>
                 <Button onClick={() => setRecordLimit(recordLimit + 14)}>Show More</Button>
                 <Button onClick={() => setRecordLimit(14)}>Reset</Button>
             </div>
             <h2>{`${selectedData.charAt(0).toUpperCase() + selectedData.slice(1)} Solar Generation Averages`}</h2>
-            <Line data={data} options={options} />
+            <Line data={selectedData === 'realtime' ? realtimeChartData : data} options={options} />
         </div>
     );
 };
