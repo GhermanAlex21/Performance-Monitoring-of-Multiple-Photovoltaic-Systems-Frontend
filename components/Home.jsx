@@ -41,20 +41,22 @@ function Home() {
     }, []);
 
     const initMap = async (inverterData, userId) => {
-        // Load required libraries
-        const { Map } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+        if (!window.google) {
+            console.error('Google Maps API not loaded');
+            return;
+        }
 
-        // Initialize map with a valid Map ID and custom styles
+        const { Map } = await window.google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await window.google.maps.importLibrary("marker");
+
         const map = new Map(document.getElementById('map'), {
             zoom: 13,
             center: { lat: 47.6573, lng: 23.5681 },
-            mapId: '51f3d46cdbaab1df' // Replace with your actual Map ID
+            mapId: '2fa6cf127c91e2b6' 
         });
 
         mapRef.current = map;
 
-        // Add a legend to the map
         const legend = document.createElement('div');
         legend.innerHTML = `
             <div style="background-color: white; padding: 10px; margin: 10px; border: 1px solid #ccc;">
@@ -63,7 +65,7 @@ function Home() {
                 <p><img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png" /> Other Inverters</p>
             </div>
         `;
-        map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
+        map.controls[window.google.maps.ControlPosition.RIGHT_TOP].push(legend);
 
         inverterData.forEach((inverter, index) => {
             const isUserInverter = inverter.user && inverter.user.id === parseInt(userId);
@@ -103,7 +105,7 @@ function Home() {
                     infoWindowRef.current.close();
                 }
 
-                const infoWindow = new google.maps.InfoWindow({
+                const infoWindow = new window.google.maps.InfoWindow({
                     content: contentString
                 });
 

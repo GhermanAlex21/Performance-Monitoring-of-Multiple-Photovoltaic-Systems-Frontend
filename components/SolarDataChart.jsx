@@ -44,8 +44,8 @@ const SolarDataChart = () => {
                     datasets: [{
                         label: `${period.charAt(0).toUpperCase() + period.slice(1)} Average Generation (MW)`,
                         data: values,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: '#8BC34A',
+                        backgroundColor: 'rgba(139, 195, 74, 0.5)',
                         tension: 0.1,
                         fill: true,
                         pointRadius: 3,
@@ -110,8 +110,8 @@ const SolarDataChart = () => {
         datasets: [{
             label: 'Real-time Generation (MW)',
             data: (realtimeData[pesId] || []).map(item => item.generationMW),
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: '#8BC34A',
+            backgroundColor: 'rgba(139, 195, 74, 0.5)',
             tension: 0.1,
             fill: true,
             pointRadius: 3,

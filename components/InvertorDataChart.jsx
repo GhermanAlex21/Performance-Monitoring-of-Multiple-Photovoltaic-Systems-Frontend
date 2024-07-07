@@ -29,15 +29,17 @@ const InvertorDataChart = () => {
     const fetchData = async () => {
         setLoading(true);
         setError(null);
-        const url = `http://localhost:8000/daily/${pesId}`;
+        const url = `http://localhost:8000/fourHourTotalEnergy/${pesId}`;
         try {
             const response = await axios.get(url);
             if (response.data && Object.keys(response.data).length) {
-                const periods = Object.keys(response.data).sort();
-                const data = periods.map(periodKey => ({
-                    date: new Date(periodKey),
-                    value: response.data[periodKey]
-                }));
+                const data = Object.entries(response.data)
+                    .filter(([_, value]) => value != null)
+                    .map(([key, value]) => ({
+                        date: new Date(key),
+                        value: value
+                    }))
+                    .sort((a, b) => a.date - b.date);
                 setChartData(data);
             } else {
                 setError('No data available');
@@ -58,68 +60,50 @@ const InvertorDataChart = () => {
         setAmChart(chart);
 
         chart.paddingRight = 20;
-
         chart.data = chartData;
 
         let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+        dateAxis.renderer.minGridDistance = 60;
+        dateAxis.baseInterval = { timeUnit: "hour", count: 4 };
+        dateAxis.skipEmptyPeriods = true;
+
         let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
         valueAxis.tooltip.disabled = true;
-
-        // Add unit to the labels
-        valueAxis.renderer.labels.template.adapter.add("text", function (text) {
-            return text + " MW";
-        });
-
-        // Ensure all dates are shown, but only show labels every 3 days
-        dateAxis.renderer.minGridDistance = 30;
-        dateAxis.baseInterval = { timeUnit: "day", count: 1 };
-        dateAxis.skipEmptyPeriods = false;
-        dateAxis.renderer.grid.template.location = 0;
-        dateAxis.renderer.fullWidthTooltip = true;
-        dateAxis.renderer.labels.template.adapter.add("text", function (text, target) {
-            let date = new Date(target.dataItem.value);
-            return date.getDate() % 3 === 0 ? text : "";
-        });
+        valueAxis.renderer.labels.template.adapter.add("text", (text) => text + " MW");
 
         let series = chart.series.push(new am4charts.LineSeries());
         series.dataFields.dateX = 'date';
         series.dataFields.valueY = 'value';
-        series.tooltipText = 'Date: {dateX.formatDate("yyyy-MM-dd")}\nValue: {valueY.value} MW';
+        series.tooltipText = "Date: {dateX.formatDate('yyyy-MM-dd HH:mm')}\nTotal Energy: {valueY.value} MW";
         series.strokeWidth = 2;
-        series.minBulletDistance = 15;
-        series.fillOpacity = 0.5; // Fill the area under the line
+        series.tensionX = 0.8; // Set tension for curved lines
+        series.fillOpacity = 0.2; // Set fill opacity
+        series.fill = am4core.color("#8BC34A"); // Set fill color
 
-        series.tooltip.pointerOrientation = 'vertical';
+        series.bullets.push(new am4charts.CircleBullet());
+
+        // Schimbăm culoarea liniilor la un verde mai deschis
+        series.stroke = am4core.color("#8BC34A");
 
         chart.cursor = new am4charts.XYCursor();
-        chart.cursor.xAxis = dateAxis;
-
-        let scrollbarX = new am4charts.XYChartScrollbar();
-        scrollbarX.series.push(series);
-        scrollbarX.marginBottom = 20; // Adjust scrollbar margin
-        chart.scrollbarX = scrollbarX;
-
-        // Show labels every 3 days in scrollbar
-        let sbDateAxis = scrollbarX.scrollbarChart.xAxes.getIndex(0);
-        if (sbDateAxis) {
-            sbDateAxis.renderer.labels.template.adapter.add("text", function (text, target) {
-                let date = new Date(target.dataItem.value);
-                return date.getDate() % 3 === 0 ? text : "";
-            });
-        }
-
-        // Extend the line to the end of the container
-        dateAxis.startLocation = 0.5;
-        dateAxis.endLocation = 1;
+        chart.scrollbarX = new am4charts.XYChartScrollbar();
+        chart.scrollbarX.series.push(series);
 
         chart.events.on('ready', function () {
-            dateAxis.zoom({ start: 0.79, end: 1 });
+            if (chartData.length > 30) {
+                dateAxis.zoomToDates(
+                    chartData[chartData.length - 30].date,
+                    chartData[chartData.length - 1].date
+                );
+            }
         });
     };
 
     return (
         <div>
-            <h2>Daily Solar Generation Data</h2>
+            <h2>Four Hour Total Solar Energy</h2>
+            {loading && <p>Loading...</p>}
+            {error && <p>Error: {error}</p>}
             <div id="chartdiv" style={{ width: '100%', height: '500px' }}></div>
         </div>
     );
