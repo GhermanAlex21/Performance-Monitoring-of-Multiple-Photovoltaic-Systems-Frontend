@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAllMarcas, getSeriesByMarcaId, deleteSerie } from "../utils/service";
 import { Link } from "react-router-dom";
-import { FaPlus, FaEdit } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 
 const GetAllSeries = () => {
   const [serii, setSerii] = useState([]);
@@ -62,17 +62,15 @@ const GetAllSeries = () => {
   }
 
   return (
-    <section className="container">
-      <div className="row mt-5">
-        <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
-          <h4>All Serii</h4>
-        </div>
+    <section className="series-container">
+      <div className="series-header">
+        <h4>All Serii</h4>
         {isAdmin && (
-          <div className="col-md-4 d-flex justify-content-end">
-            <Link to={"/series/add"}>
+          <Link to={"/series/add"}>
+            <button className="btn btn-sm btn-outline-success">
               <FaPlus /> Add Serie
-            </Link>
-          </div>
+            </button>
+          </Link>
         )}
       </div>
       <div className="row mt-3">
@@ -99,25 +97,42 @@ const GetAllSeries = () => {
       {selectedMarca && serii.length === 0 && (
         <p>No series available for the selected marca.</p>
       )}
-      {selectedMarca && serii.length > 0 && serii.map((serie, index) => (
-        <div key={serie.id}>
-          <pre>
-            <h4 style={{ color: "GrayText" }}>{`${index + 1}. ${serie.nume}`}</h4>
-          </pre>
-          {isAdmin && (
-            <div className="btn-group mb-4">
-              <Link to={`/update-serie/${serie.id}`}>
-                <button className="btn btn-sm btn-outline-warning mr-2"><FaEdit /> Edit Serie</button>
-              </Link>
-              <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => handleDeleteSerie(serie.id)}>
-                Delete Serie
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
+      {selectedMarca && serii.length > 0 && (
+        <table className="series-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Serie</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {serii.map((serie, index) => (
+              <tr key={serie.id}>
+                <td>{index + 1}</td>
+                <td>{serie.nume}</td>
+                <td>
+                  {isAdmin && (
+                    <div className="btn-group-series">
+                      <Link to={`/update-serie/${serie.id}`}>
+                        <button className="btn btn-sm btn-outline-warning">
+                          <FaEdit /> Edit Serie
+                        </button>
+                      </Link>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDeleteSerie(serie.id)}
+                      >
+                        <FaTrash /> Delete Serie
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 };

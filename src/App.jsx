@@ -55,6 +55,7 @@ const App = () => {
                         <Route path="/compare/:id1/:id2/:marca1/:serie1/:marca2/:serie2" element={<CompareInverters />} /> 
                         <Route path="/live" element={<SolarPanelDataComponent/>}/>
                         <Route path="/my-inverters" element={<MyInverters />} />
+                        
                     </Route>
                 </Routes>
             </div>

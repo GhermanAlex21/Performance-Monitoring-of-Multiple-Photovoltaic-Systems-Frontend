@@ -1,0 +1,78 @@
+.get-all-invertors-container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1b1b1b;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.get-all-invertors-container h4 {
+    color: #f9f9f9;
+    font-weight: 600;
+    margin: 0; /* Elimină marginile din jurul titlului */
+    padding-bottom: 5px; /* Adaugă puțin spațiu sub titlu */
+}
+
+.get-all-invertors-container .alert {
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.get-all-invertors-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px; /* Reduce spațiul deasupra tabelului */
+}
+
+.get-all-invertors-container th, .get-all-invertors-container td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.get-all-invertors-container th {
+    background-color: #333;
+    font-weight: bold;
+    color: #f9f9f9;
+}
+
+.get-all-invertors-container td {
+    color: #f9f9f9;
+}
+
+.get-all-invertors-container .btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.get-all-invertors-container .btn-outline-success {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.get-all-invertors-container .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.get-all-invertors-container .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.get-all-invertors-container .btn-outline-success:hover, 
+.get-all-invertors-container .btn-outline-warning:hover, 
+.get-all-invertors-container .btn-outline-danger:hover {
+    color: #fff;
+}
+
+.get-all-invertors-container .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.get-all-invertors-container .row .col-md-6 {
+    margin-bottom: 0; /* Elimină marginile inferioare */
+}

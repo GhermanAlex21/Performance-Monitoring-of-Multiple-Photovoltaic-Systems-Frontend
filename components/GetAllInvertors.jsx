@@ -45,15 +45,17 @@ const GetAllInvertors = () => {
   }
 
   return (
-    <section className="container">
+    <section className="get-all-invertors-container">
       <div className="row mt-5">
-        <div className="col-md-6 mb-2 md-mb-0" style={{ color: "GrayText" }}>
+        <div className="col-md-6">
           <h4>All Invertors</h4>
         </div>
         {isAdmin && (
-          <div className="col-md-4 d-flex justify-content-end">
+          <div className="col-md-6 d-flex justify-content-end">
             <Link to={"/invertor/add"}>
-              <FaPlus /> Add Invertor
+              <button className="btn btn-sm btn-outline-success mr-2">
+                <FaPlus /> Add Invertor
+              </button>
             </Link>
           </div>
         )}
@@ -62,30 +64,42 @@ const GetAllInvertors = () => {
       {isInvertorDeleted && (
         <div className="alert alert-success">{deleteSuccess}</div>
       )}
-      {invertors.map((invertor, index) => (
-        <div key={invertor.id}>
-          <pre>
-            <h4 style={{ color: "GrayText" }}>
-              {`${index + 1}. Marca: ${invertor.marca.nume}, Serie: ${invertor.serie.nume}, Proprietar: ${invertor.user.nume} ${invertor.user.prenume}`}
-            </h4>
-          </pre>
-          {isAdmin && (
-            <div className="btn-group mb-4">
-              <Link to={`/invertor/update/${invertor.id}`}>
-                <button className="btn btn-sm btn-outline-warning mr-2">
-                  <FaEdit /> Update Invertor
-                </button>
-              </Link>
-              <button
-                className="btn btn-sm btn-outline-danger"
-                onClick={() => handleDeleteInvertor(invertor.id)}
-              >
-                <FaTrash /> Delete Invertor
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Marca</th>
+            <th>Serie</th>
+            <th>Proprietar</th>
+            {isAdmin && <th>Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {invertors.map((invertor, index) => (
+            <tr key={invertor.id}>
+              <td>{index + 1}</td>
+              <td>{invertor.marca.nume}</td>
+              <td>{invertor.serie.nume}</td>
+              <td>{`${invertor.user.nume} ${invertor.user.prenume}`}</td>
+              {isAdmin && (
+                <td className="btn-group">
+                  <Link to={`/invertor/update/${invertor.id}`}>
+                    <button className="btn btn-sm btn-outline-warning">
+                      <FaEdit /> Update Invertor
+                    </button>
+                  </Link>
+                  <button
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={() => handleDeleteInvertor(invertor.id)}
+                  >
+                    <FaTrash /> Delete Invertor
+                  </button>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 };

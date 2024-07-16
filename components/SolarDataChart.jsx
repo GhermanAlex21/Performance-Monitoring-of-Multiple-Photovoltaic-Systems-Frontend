@@ -12,25 +12,37 @@ const SolarDataChart = () => {
     const [pesOptions, setPesOptions] = useState([
         { label: 'PES ID 0', value: 0 },
         { label: 'PES ID 10', value: 10 },
-        // Add other PES IDs here
+        { label: 'PES ID 11', value: 11 },
+        { label: 'PES ID 12', value: 12 },
+        { label: 'PES ID 13', value: 13 },
+        { label: 'PES ID 14', value: 14 },
+        { label: 'PES ID 15', value: 15 },
+        { label: 'PES ID 16', value: 16 },
+        { label: 'PES ID 17', value: 17 },
+        { label: 'PES ID 18', value: 18 },
+        { label: 'PES ID 19', value: 19 },
+        { label: 'PES ID 20', value: 20 },
+        { label: 'PES ID 21', value: 21 },
+        { label: 'PES ID 22', value: 22 },
+        { label: 'PES ID 23', value: 23 }
     ]);
     const [recordLimit, setRecordLimit] = useState(14);
-    const [realtimeData, setRealtimeData] = useState({});
+    const [todayData, setTodayData] = useState({});
     const wsRef = useRef(null);
 
     useEffect(() => {
-        if (pesId !== null && selectedData !== 'realtime') {
+        if (pesId !== null && selectedData !== 'today') {
             fetchData(selectedData);
+        } else if (pesId !== null && selectedData === 'today') {
+            connectWebSocket();
         }
     }, [pesId, selectedData, recordLimit]);
 
     useEffect(() => {
-        if (selectedData === 'realtime') {
-            connectWebSocket();
-        } else {
+        return () => {
             if (wsRef.current) wsRef.current.close();
-        }
-    }, [selectedData]);
+        };
+    }, []);
 
     const fetchData = (period) => {
         const url = `http://localhost:8000/${period}/${pesId}?limit=${recordLimit}`;
@@ -67,14 +79,24 @@ const SolarDataChart = () => {
         ws.onmessage = (event) => {
             console.log('WebSocket message received:', event.data);
             const updatedData = JSON.parse(event.data);
-            setRealtimeData(prevData => {
-                const newData = { ...prevData };
-                if (!newData[updatedData.pesId]) {
-                    newData[updatedData.pesId] = [];
-                }
-                newData[updatedData.pesId] = [...newData[updatedData.pesId].filter(data => data.datetimeGMT !== updatedData.datetimeGMT), updatedData];
-                return newData;
-            });
+            const messageDate = new Date(updatedData.datetimeGMT).toLocaleDateString();
+            const todayDate = new Date().toLocaleDateString();
+
+            if (messageDate === todayDate) {
+                setTodayData(prevData => {
+                    const newData = { ...prevData };
+                    if (!newData[updatedData.pesId]) {
+                        newData[updatedData.pesId] = [];
+                    }
+                    // Verifică dacă înregistrarea există deja
+                    const exists = newData[updatedData.pesId].some(item => item.datetimeGMT === updatedData.datetimeGMT);
+                    if (!exists) {
+                        newData[updatedData.pesId] = [...newData[updatedData.pesId], updatedData];
+                        newData[updatedData.pesId].sort((a, b) => new Date(a.datetimeGMT) - new Date(b.datetimeGMT));
+                    }
+                    return newData;
+                });
+            }
         };
 
         ws.onerror = (error) => {
@@ -105,11 +127,11 @@ const SolarDataChart = () => {
         setRecordLimit(14);
     };
 
-    const realtimeChartData = {
-        labels: (realtimeData[pesId] || []).map(item => new Date(item.datetimeGMT).toLocaleTimeString()),
+    const todayChartData = {
+        labels: (todayData[pesId] || []).map(item => new Date(item.datetimeGMT).toLocaleTimeString()),
         datasets: [{
-            label: 'Real-time Generation (MW)',
-            data: (realtimeData[pesId] || []).map(item => item.generationMW),
+            label: 'Generation (MW) Today',
+            data: (todayData[pesId] || []).map(item => item.generationMW),
             borderColor: '#8BC34A',
             backgroundColor: 'rgba(139, 195, 74, 0.5)',
             tension: 0.1,
@@ -126,7 +148,8 @@ const SolarDataChart = () => {
             x: {
                 type: 'category',
                 ticks: {
-                    autoSkip: false
+                    autoSkip: true,
+                    maxTicksLimit: 48 // approximately every 30 minutes if data points are every 5 minutes
                 }
             },
             y: {
@@ -167,14 +190,13 @@ const SolarDataChart = () => {
             />
             <div>
                 <button onClick={() => handleSelectPeriod('daily')}>Daily</button>
-                <button onClick={() => handleSelectPeriod('weekly')}>Weekly</button>
                 <button onClick={() => handleSelectPeriod('monthly')}>Monthly</button>
-                <button onClick={() => handleSelectPeriod('realtime')}>Real-time</button>
+                <button onClick={() => handleSelectPeriod('today')}>Today</button>
                 <Button onClick={() => setRecordLimit(recordLimit + 14)}>Show More</Button>
                 <Button onClick={() => setRecordLimit(14)}>Reset</Button>
             </div>
             <h2>{`${selectedData.charAt(0).toUpperCase() + selectedData.slice(1)} Solar Generation Averages`}</h2>
-            <Line data={selectedData === 'realtime' ? realtimeChartData : data} options={options} />
+            <Line data={selectedData === 'today' ? todayChartData : data} options={options} />
         </div>
     );
 };

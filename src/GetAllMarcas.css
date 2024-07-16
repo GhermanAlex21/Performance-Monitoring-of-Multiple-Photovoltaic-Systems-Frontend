@@ -1,0 +1,78 @@
+.marcas-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .marcas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  h4 {
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .alert {
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  
+  .marcas-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .marcas-table th, .marcas-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .marcas-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .btn-group-marcas {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-outline-success {
+    color: #28a745;
+    border-color: #28a745;
+  }
+  
+  .btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+  }
+  
+  .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+  
+  .btn-outline-success:hover,
+  .btn-outline-warning:hover,
+  .btn-outline-danger:hover {
+    color: #fff;
+  }
+  
+  pre {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  pre h4 {
+    margin: 0;
+    font-size: 16px;
+  }
+  

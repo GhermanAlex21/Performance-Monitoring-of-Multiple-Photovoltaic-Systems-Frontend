@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import '../src/Login.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -20,7 +21,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-    
+
         try {
             const response = await axios.post('http://localhost:8000/login', { username, password });
             const decodedToken = parseJwt(response.data);
@@ -42,31 +43,33 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Username:</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Login</button>
-            </form>
-            <p>Nu ai un cont? <Link to="/user-save">Creează unul aici.</Link></p>
+        <div className="login-container">
+            <div className="login-box">
+                <h2>Login</h2>
+                {error && <p className="error-message">{error}</p>}
+                <form className="login-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Username:</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Password:</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <p>Nu ai un cont? <Link to="/user-save">Creează unul aici.</Link></p>
+            </div>
         </div>
     );
 };
