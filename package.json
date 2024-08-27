@@ -14,7 +14,7 @@
     "@react-google-maps/api": "^2.19.3",
     "@stomp/stompjs": "^7.0.0",
     "antd": "^5.19.2",
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.2",
     "chartjs-adapter-date-fns": "^3.0.0",
